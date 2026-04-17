@@ -1,0 +1,134 @@
+﻿Міністерство освіти і науки України 
+Харківський національний університет радіоелектроніки 
+  
+Кафедра програмної інженерії 
+   
+  
+   
+Звіт 
+З лабораторної роботи №1 “ Python та Django” 
+з дисципліни «Високорівневі мови програмування та фреймворки» 
+ 
+ 
+ 
+ 
+  
+Виконала:                                                                               Перевірив: 
+ст.гр. ПЗПІ-23-9                                                                     ст.в.кафедри ПІ    Пащенко Я.О.                                                                         Саманцов О.О.
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+Харків 2026
+
+
+Python та Django
+
+
+1. Хід роботи
+Номер в журналі 10, отже варіант 10%9 = 1.
+1. Створіть Django-проект та додаток, який має модель "Стаття" з полями "Заголовок", "Текст" та "Дата публікації".
+Спочатку для створення проекту була виконана команда django-admin startproject Lab1VMPF. Далі, так як Стаття на англійській article, щоб створити такий додаток було використано команду python manage.py startapp Article.
+  
+ 
+Далі зашла у файл models та для створення моделі з полями "Заголовок", "Текст" та "Дата публікації", я написала класс Article:
+class Article (models. Model):
+title = models. CharField(max_length=255)
+text = models. TextField()
+published_at = models. DateTimeField (auto_now_add=True)
+  
+
+2. Розширте модель "Стаття", додавши поле "Автор". За допомогою Django ORM, виведіть на екран інформацію про всі статті конкретного автора.
+Для цього я додала поле author у файлі models : author = models. ForeignKey('auth. User', on_delete=models.CASCADE), так як автор є ключем іншої таблиці, а не атрибутом цієї, бо якщо робити не через зовнішній ключ, ми не зможемо коректно об'єднувати та виводити всі статті конкретного автора. Я вирішила не створювати власний клас автора з нуля, а використати auth.User, як в прикладах в методичці, бо це доволі зручно, так як ця модель вже містить усе що потрібно для автора. 
+Далі, для того щоб відобразити ці дані, я налаштувала контролер у файлі views.py. Спочатку я імпортувала свою модель Article, а потім написала функцію для виводу статей. Щоб виводити статті конкретного автора, я зробила функцію динамічною, а саме додала аргумент author_id. За допомогою Django ORM я відфільтрувала всі записи бази даних (Article.objects.filter(author=author_id)), сформувала словник context і передала його для рендеру в HTML-шаблон.
+from django.shortcuts import render
+from .models import Article
+
+
+def author_articles(request, author_id):
+    articles = Article.objects.filter(author=author_id)
+    context = {
+        'articles' : articles
+    }
+
+
+    return render (request, 'article/list.html', context)
+
+
+Наостанок, щоб Django міг як раз отримувати id конкретного автора прямо з веб-адреси (наприклад, /author/1/) і передавати його в мій контролер, я прописала відповідний маршрут <int:author_id> у файлі urls.py:
+from django.contrib import admin
+from django.urls import path
+from Article import views
+
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('author/<int:author_id>/', views.author_articles)
+]
+3. Створіть шаблон Django для відображення списку статей та окремої статті. Застосуйте цей шаблон до веб-інтерфейсу.
+Спочатку я налаштувала правильну структуру файлів за стандартами Django. У папці мого додатку Article я створила директорію templates, а всередині неї підпапку article (щоб створити ізольований простір імен для шаблонів саме цього додатку). Туди я додала два файли: list.html та detail.html. Також я зареєструвала свій додаток Article у списку INSTALLED_APPS у файлі settings.py, щоб фреймворк міг успішно знаходити ці шаблони.
+
+
+Для відображення списку я застосувала синтаксис шаблона Django: використала тег циклу {% for article in articles %}, щоб ітерувати переданий з контролера словник, та вивела інформацію про кожну статтю за допомогою змінних у подвійних фігурних дужках (наприклад, {{ article.title }}). Для шаблону окремої статті, а саме detail.html, просто розмістила змінні {{ article.title }}, {{ article.text }} та інші у відповідних HTML-тегах сторінки.
+List.html:
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Список статей</title>
+</head>
+<body>
+    <h1>Список статей</h1>
+    <ul>
+        {% for article in articles %}
+            <li>
+                <h2>{{ article.title }}</h2>
+                <p>{{ article.text }}</p>
+                <small>Автор: {{ article.author }} | Опубліковано: {{ article.published_at }}</small>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
+
+
+Detail.html:
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ article.title }}</title>
+</head>
+<body>
+    <h1>{{ article.title }}</h1>
+    <p>{{ article.text }}</p>
+    <hr> <small>Автор: {{ article.author }} | Опубліковано: {{ article.published_at }}</small>
+</body>
+</html>
+
+
+Щоб сторінка окремої статті запрацювала, я додала нову функцію article_detail(request, article_id) у файлі views.p, застосувала метод Article.objects.get(id=article_id), щоб отримати з бд рівно один запис, який відповідає запитаному ідентифікатору, і передати його в словник context.
+І також оновила головний файл urls.py, додавши новий маршрут:
+path('article/<int:article_id>/', views.article_detail), щоб Django перехоплював ID статті прямо з URL-адреси браузера та направляв його в мій контролер для відображення відповідного шаблону.
+4. Додайте API-вид статей, який дозволяє витягувати дані статей у форматі JSON. Використовуйте Django REST Framework.
+Для цього встановила бібліотеку DRF через термінал та зареєструвала її, додавши рядок 'rest_framework' до списку INSTALLED_APPS у конфігураційному файлі settings.py. Наступним кроком, створила файл serializers.py у папці мого додатку Article. У ньому я оголосила клас ArticleSerializer, який успадковується від serializers.ModelSerializer. Я вказала йому працювати з моделлю Article та серіалізувати всі її поля (за допомогою команди fields = '__all__'). Після цього налаштувала контролер, а саме у файлі views.py я імпортувала необхідні декоратори та класи з rest_framework, а також серіалізатор та додала нову функцію api_articles, обгорнуту декоратором @api_view(['GET']), ця функція дістає всі статті з бази даних (Article.objects.all()), передає їх у серіалізатор із параметром many=True (оскільки ми обробляємо список об'єктів), і повертає готовий JSON-результат через об'єкт Response.
+@api_view(['GET'])
+def api_articles(request):
+    articles = Article.objects.all()
+    serializer = ArticleSerializer(articles, many=True)
+
+
+    return Response(serializer.data)
+
+
+І в кінці просто до urls.py додала новий шлях: path('api/articles/', views.api_articles).
