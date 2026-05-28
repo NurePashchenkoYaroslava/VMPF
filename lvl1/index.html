@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Рандомний факт</title>
+</head>
+<body>
+    <h2>Цікавий факт на сьогодні:</h2>
+    <p id="fact-container">Завантаження...</p>
+
+    <script>
+        fetch('facts.json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Мережева помилка');
+                }
+                return response.json(); 
+            })
+            .then(data => {
+                let randomIndex = Math.floor(Math.random() * data.length);
+                let randomFact = data[randomIndex];
+                document.getElementById('fact-container').textContent = randomFact;
+            })
+            .catch(error => {
+                console.log("ERROR", error);
+                document.getElementById('fact-container').textContent = "Не вдалося завантажити факт.";
+            })
+            .finally(() => {
+                console.log('Запит завершено');
+            });
+    </script>
+</body>
+</html>
