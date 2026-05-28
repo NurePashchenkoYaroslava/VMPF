@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Список статей</title>
+</head>
+<body>
+    <h1>Список статей</h1>
+    <ul>
+        {% for article in articles %}
+            <li>
+                <h2>{{ article.title }}</h2>
+                <p>{{ article.text }}</p>
+                <small>Автор: {{ article.author }} | Опубліковано: {{ article.published_at }}</small>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
