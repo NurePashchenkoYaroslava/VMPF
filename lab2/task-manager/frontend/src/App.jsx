@@ -139,7 +139,6 @@ function App() {
       </div>
 
       <div className="main-content">
-        {/* ЛІВА КОЛОНКА */}
         <div className="column">
           
           <div className="card">

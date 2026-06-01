@@ -1,0 +1,8 @@
+com.example.librarylab.app-pngs-0 E:\pz3\app\build\generated\res\pngs\debug
+com.example.librarylab.app-updated_navigation_xml-1 E:\pz3\app\build\generated\updated_navigation_xml\debug
+com.example.librarylab.app-packageDebugResources-2 E:\pz3\app\build\intermediates\incremental\debug\packageDebugResources\merged.dir
+com.example.librarylab.app-packageDebugResources-3 E:\pz3\app\build\intermediates\incremental\debug\packageDebugResources\stripped.dir
+com.example.librarylab.app-debug-4 E:\pz3\app\build\intermediates\merged_res\debug\mergeDebugResources
+com.example.librarylab.app-debug-5 E:\pz3\app\src\debug\res
+com.example.librarylab.app-main-6 E:\pz3\app\src\main\res
+gradleHome-0 E:\Gradle
